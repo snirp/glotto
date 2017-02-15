@@ -1,0 +1,44 @@
+/* PLAY-YOUTUBE */
+
+.caption-box {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.subtitles {
+  text-align: center;
+  font-size: 18px;
+  line-height: 1.4;
+  text-shadow: 1px 1px 1px black;
+}
+
+.subtitles span {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+#lyrics{
+  color: white;
+}
+
+#translations{
+  color: #62f591;
+}
+
+#controls {
+  position: absolute;
+  top: 324px;
+  right: 0;
+  height: 36px;
+  width: 450px;
+}
+
+.control {
+  margin: 0 0.25rem;
+}
+
+.control-selector {
+  width: 120px;
+}

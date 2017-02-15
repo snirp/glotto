@@ -1,0 +1,19 @@
+{% extends 'caption/_base.html' %}
+
+{% block head %}
+  {{ block.super }}
+{% endblock %}
+
+
+{% block body %}
+<h2>{{ item.title }}</h2>
+<small>
+{% for a in item.artists.all %}
+  {{ a }}{% include 'caption/includes/enumeration.html' %}
+{% endfor %}
+</small>
+
+<a href="{% url 'play-item' media=item.media_type i_id=item.id %}">Play</a>
+<a href="{% url 'edit-item' media=item.media_type i_id=item.id %}">Edit</a>
+
+{% endblock %}

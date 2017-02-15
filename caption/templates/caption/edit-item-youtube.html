@@ -1,0 +1,18 @@
+{% extends 'caption/edit-item_base.html' %}
+
+{% block head %}
+  {{ block.super }}
+{% endblock %}
+
+{% block body %}
+  {{ block.super }}
+
+    <h2>Edit youtube</h2>
+  <form action="{% url 'edit-item' media=item.media_type i_id=item.id %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Edit youtube">
+  </form>
+
+
+{% endblock %}

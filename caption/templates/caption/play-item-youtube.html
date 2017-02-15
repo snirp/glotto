@@ -1,0 +1,151 @@
+{% extends 'caption/play-item_base.html' %}
+
+{% block head %}
+  {{ block.super }}
+
+
+{% endblock %}
+
+{% block body %}
+
+<div id="iframe-container">
+<div id="player"></div>
+</div>
+
+<div class="container caption-box">
+  <div class="row my-4">
+    <div id="lyrics" class="col subtitles">
+      <span class="px-2 py-1">Here come the lyrics...</span>
+    </div>
+  </div>
+  <div class="row my-4">
+    <div id="translations" class="col subtitles">
+      <span class="px-2 py-1">Here come the translations...</span>
+    </div>
+  </div>
+</div>
+
+  <div id="controls" class="py-1 pr-2 text-right">
+    <input type="checkbox" checked id="toggle-lyrics" class="control">
+    <select id="select-modus" class="control control-selector">
+      <option value="mode-1">normal</option>
+      <option value="mode-2">consonants</option>
+      <option value="mode-2">random</option>
+    </select>
+    <input type="checkbox" checked id="toggle-translation" class="control">
+    <select id="select-translation" class="control control-selector">
+    {% for key, value in translations.items %}
+      <option value="{{ key }}">{{ key }}</option>
+    {% endfor %}
+    </select>
+  </div>
+
+<script id="youtube">
+// Load the youtube API async and insert iframe with video
+  var tag = document.createElement('script');
+
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      height: '360',
+      width: '100%',
+      videoId: '{{ item.youtube.key }}',
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onStateChange
+      },
+      playerVars: {
+        'color': 'white',
+        'modestbranding': 1,
+        'fs': 0,
+        'rel': 0,
+        'showinfo': 0,
+        'autoplay': 1
+      }
+    });
+  }
+</script>
+
+<script id="translation">
+var translations = {{ translations|safe }};
+var translationLanguage = 'en-us';
+var trans = translations[translationLanguage];  // Array of translation strings
+var translationSelector = $("#select-translation");
+
+translationSelector.val(translationLanguage);
+translationSelector.change(function() {
+  translationLanguage = translationSelector.val();
+  trans = translations[translationSelector.val()]
+});
+</script>
+
+<script id="lyrics">
+var times = {{ times|safe }};  // Ordered array of times
+var texts = {{ texts|safe }};  // Ordered array of lyrics
+var pending = [];  // Save timeouts to array, so they can be cleared if needed
+
+function updateLyrics(line, selector){
+  // TODO: some fancy fade in/out
+  $(selector+' span').html(line);
+}
+
+function playLyrics(start){
+  start = typeof start !== 'undefined' ? start : 0;
+
+  // Ensure that we get the right starting point (returns -1 after last line)
+  function greaterThan(element) { return element >= start; }
+  var nextItemIndex = times.findIndex(greaterThan);
+
+  // Display the current line
+  updateLyrics(texts[nextItemIndex-1], '#lyrics');
+  updateLyrics(trans[nextItemIndex-1], '#translations');
+
+  for (var i = nextItemIndex; i < times.length; i++) {
+    var t = setTimeout(function(x) {
+      return function() {
+        updateLyrics(texts[x], '#lyrics');
+        updateLyrics(trans[x], '#translations');
+      };
+    }(i), (times[i]-start)*100);
+
+    // Push the timeout to an array for eventual cancelling
+    pending.push(t);
+  }
+}
+
+function clearLyrics(){
+  while(pending.length > 0) {
+    clearTimeout(pending.shift());
+  }
+}
+</script>
+
+
+<script id="controls">
+function hideControls(){ $('#controls').hide(); }
+function showControls(){ $('#controls').show(); }
+// Store the pending Hide in this var, so it can be cancelled with pauze button
+var pendingHide = null;
+
+function onPlayerReady(event) {
+  playLyrics();
+}
+
+function onStateChange(event) {
+  if (event.data == 1) {
+    playLyrics(Math.round(player.getCurrentTime()*10));
+    // onStateChange can also be triggered after onPlayerReady, so we need to prevent overwriting the existing timeout.
+  } else {
+    clearLyrics();
+    // Make sure that a pending hide will not be triggered during non-play event
+
+  }
+}
+
+</script>
+
+{% endblock %}
