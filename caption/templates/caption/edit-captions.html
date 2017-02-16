@@ -1,0 +1,31 @@
+{% extends 'caption/_base.html' %}
+
+{% block head %}
+  {{ block.super }}
+{% endblock %}
+
+
+{% block body %}
+
+<div id="iframe-container">
+  <div id="player"></div>
+</div>
+
+<h2>{{ item.title }}</h2>
+  <small>Orginal captions: {{ item.language }}</small>
+
+<form action="{% url 'edit-captions' media=item.media_type i_id=item.id %}" method="POST">
+{% csrf_token %}
+{% comment %}
+  Whitespace and linebreaks inside the textarea are significant for rendering and code processing.
+  If you reformat or indent this code a puppy dies.
+{% endcomment %}
+<textarea name="captions" rows="60" cols="70" title="captions" placeholder="Add lines here">
+{% for l in item.line_set.all %}{% if l.stanza %}
+{% endif %}{{l.text}}
+{% endfor %}</textarea>
+<input type="submit" value="Edit captions">
+</form>
+
+{% include 'caption/includes/mediaplayer-scripts.html' %}
+{% endblock %}

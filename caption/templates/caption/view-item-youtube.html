@@ -7,20 +7,5 @@
 {% block body %}
   {{ block.super }}
 
-  <div>
-  <p>
-  {% for l in song.line_set.all %}
-    {% if l.stanza %}
-      </p><p>
-    {% endif %}
-    {{l.text}}<br>
-  {% endfor %}
-  </p>
-  </div>
-  <a href="">Edit</a>
-  <a href="">Cue</a>
-  <h3>Translations</h3>
-  <!-- full and partial -->
-  <a href="">Add translation</a>
 
 {% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'caption/_base.html' %}
+
+{% block head %}
+  {{ block.super }}
+{% endblock %}
+
+
+{% block body %}
+
+<div id="iframe-container">
+  <div id="player"></div>
+</div>
+
+<div class="container">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th colspan="2" class="text-center">Cue in</th>
+          <th colspan="2" class="text-center">Cue out</th>
+          <th>Caption</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for line in item.line_set.all %}
+        <tr>
+          <td id="time-in-{{ line.id }}" class="text-right text-muted">
+            {{ line.cue_in|default_if_none:"-"  }}
+          </td>
+          <td>
+            <a id="cue-in-{{ line.id }}" class="cue-button cue-in-button" href="#" title="Click to set cue-in time"></a>
+          </td>
+          <td  id="time-out-{{ line.id }}" class="text-right text-muted">
+            {{ line.cue_out|default_if_none:"-"  }}
+          </td>
+          <td>
+            <a id="cue-out-{{ line.id }}" class="cue-button cue-out-button" href="#" title="Click to set cue-out time"></a>
+          </td>
+          <td>
+            {{ line.text }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include 'caption/includes/mediaplayer-scripts.html' %}
+
+<script id="cue-in">
+$('.cue-in-button').click(function(){
+  var time = Math.round(player.getCurrentTime()*10);
+  var lineId = $(this).attr('id').substr(7);
+  $.ajax({
+  type: "POST",
+  url: "{% url 'cue_in' %}",
+  data: {
+    'csrfmiddlewaretoken':"{{ csrf_token }}",
+    'lineId': lineId,
+    'time': time,
+    'userId': {{ request.user.id }}
+  },
+  dataType: 'json',
+  success: function (data) {
+    $('#time-in-'+lineId).html(data.time);
+    }
+  });
+  return false;
+});
+</script>
+
+<script id="cue-out">
+$('.cue-out-button').click(function(){
+  var time = Math.round(player.getCurrentTime()*10);
+  var lineId = $(this).attr('id').substr(8);
+  $.ajax({
+  type: "POST",
+  url: "{% url 'cue_out' %}",
+  data: {
+    'csrfmiddlewaretoken':"{{ csrf_token }}",
+    'lineId': lineId,
+    'time': time,
+    'userId': {{ request.user.id }}
+  },
+  dataType: 'json',
+  success: function (data) {
+    $('#time-out-'+lineId).html(data.time);
+    }
+  });
+  return false;
+});
+</script>
+
+
+{% endblock %}

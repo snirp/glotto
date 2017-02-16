@@ -15,7 +15,7 @@ class Language(models.Model):
         return Count(self.item_set.all())
 
     class Meta:
-        ordering = ['code']
+        ordering = ['name']
 
 
 class UserContent(models.Model):
@@ -51,12 +51,18 @@ class Item(UserContent):
     def __str__(self):
         return self.title
 
+    def percentage_cued(self):
+        l_count = self.line_set.count()
+        if not l_count:
+            return 0
+        return int((self.line_set.filter(cue_in__isnull=False).count() / l_count) * 100)
+
     def first_artist(self):
         if self.artists.all():
             return self.artists.all()[0]
 
-    #def full_translations(self):
-    #    return self.translation_set.filter(lines_remaining=0)
+    def get_missing_languages(self):
+        return Language.objects.exclude(translation__in=self.translation_set.all()).exclude(pk=self.language.pk)
 
     def full_translations(self):
         fulltrans = Linetrans.objects.filter(line__item=self).values('translation').annotate(total=Count('translation')). \
@@ -66,6 +72,18 @@ class Item(UserContent):
     def get_translation_dict(self, ordering='line__number', blank_lines=False):
         trans = {}
         for t in self.full_translations():
+            lts = Linetrans.objects.filter(translation=t).order_by(ordering)
+            strings = []
+            for lt in lts:
+                if blank_lines and lt.line.stanza:
+                    strings.append("")
+                strings.append(lt.text)
+            trans[t.language.code] = strings
+        return trans
+
+    def get_translation_dict_temp(self, ordering='line__number', blank_lines=False):
+        trans = {}
+        for t in self.translation_set.all():
             lts = Linetrans.objects.filter(translation=t).order_by(ordering)
             strings = []
             for lt in lts:
@@ -115,6 +133,12 @@ class Translation(UserContent):
     def lines_remaining(self):
         return self.item.line_set.count()-self.linetrans_set.count()
 
+    def percentage_complete(self):
+        l_count = self.item.line_set.count()
+        if not l_count:
+            return 0
+        return int((self.linetrans_set.count()/l_count)*100)
+
     class Meta:
         ordering = ['item', 'language']
         unique_together = ('item', 'language',)  # One translation per item & language
@@ -158,8 +182,9 @@ class Playlist(models.Model):
 class Member(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     likes = models.ManyToManyField(Item, blank=True)
-    language = models.ForeignKey(Language)
+    primary = models.ForeignKey(Language, related_name='primary')
     subscriptions = models.ManyToManyField(Playlist, blank=True)
+    languages = models.ManyToManyField(Language, related_name='languages')
 
     def __str__(self):
         return self.user.__str__()

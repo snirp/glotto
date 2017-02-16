@@ -1,3 +1,96 @@
+/* GENERAL */
+
+.table tr th, .table tr td {
+  border-width: 0;
+}
+
+.table thead th  {
+  border-bottom: 1px solid lightgrey;
+}
+
+
+
+/* VIEW ITEM */
+
+.topright-pinned-button {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 10px;
+}
+
+.flag-round-sm {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.progress-bar {
+  display: inline-block;
+  width: 50px;
+  height: 10px;
+  background-color: lightgrey;
+}
+
+.progress-bar-wide {
+  width: 100px;
+}
+
+.progress-bar > div {
+  height: 100%;
+  background-color: dodgerblue;
+}
+
+#translated-captions{
+  display: none;
+}
+
+.play-video {
+  position: relative;
+  width: 120px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-video > img {
+  position: absolute;
+  z-index:-1;
+}
+
+/* CUE LINES */
+
+.cue-button {
+  display: block;
+  margin-left:auto;
+  margin-right:auto;
+  cursor: pointer;
+}
+
+.cue-in-button {
+  background-color: lightgreen;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.cue-in-button:hover { background-color: green; }
+.cue-in-button:active { width: 16px; height: 16px; }
+
+.cue-out-button {
+  width: 16px;
+  height: 16px;
+  background-color: lightcoral;
+}
+
+.cue-out-button:hover { background-color: red; }
+.cue-out-button:active { width: 14px; height: 14px; }
+
+.table td {
+  vertical-align:middle;
+}
+
 /* PLAY-YOUTUBE */
 
 .caption-box {

@@ -6,14 +6,118 @@
 
 
 {% block body %}
-<h2>{{ item.title }}</h2>
-<small>
-{% for a in item.artists.all %}
-  {{ a }}{% include 'caption/includes/enumeration.html' %}
-{% endfor %}
-</small>
+<div class="container">
+  <div class="row my-3">
+    <div class="col-10">
+      <h2>{{ item.title }}</h2>
+      <small>
+      {% for a in item.artists.all %}
+        {{ a }}{% include 'caption/includes/enumeration.html' %}
+      {% endfor %}
+      </small>
+    </div>
+    <div class="col-1 py-1">
+      <a href="{% url 'edit-item' media=item.media_type i_id=item.id %}" class="mr-3">
+        <i class="fa fa-pencil fa-2x"></i><br>
+        <small>edit</small>
+      </a>
+    </div>
+    <div class="col-1 py-1">
+      <a href="{% url 'play-item' media=item.media_type i_id=item.id %}">
+        <i class="fa fa-play fa-2x"></i><br>
+        <small>play</small>
+      </a>
+    </div>
+  </div>
+</div>
 
-<a href="{% url 'play-item' media=item.media_type i_id=item.id %}">Play</a>
-<a href="{% url 'edit-item' media=item.media_type i_id=item.id %}">Edit</a>
+<hr>
+
+<div class="container">
+  <div class="row">
+    <div class="col-12 col-lg-5 my-3">
+      <div>
+        <a class="topright-pinned-button" href="{% url 'edit-captions' media=item.media_type i_id=item.id %}">
+          <i class="fa fa-pencil"></i>Edit
+        </a>
+        {% for l in item.line_set.all %}
+          {% if l.stanza %}<br>{% endif %}
+          {{l.text}}<br>
+        {% endfor %}
+      </div>
+      <a href="{% url 'cue-captions' media=item.media_type i_id=item.id %}">
+        <i class="fa fa-clock-o mr-2"></i>Cue capsions</a>
+      <div class="progress-bar progress-bar-wide ml-2">
+        <div style="width: {{ item.percentage_cued }}%"></div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7 my-3">
+      <div class="table-responsive" id="original-content">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Translation</th>
+              <th>Title</th>
+              <th>Done</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <form action="{% url 'view-item' media=item.media_type i_id=item.id %}" method="post">
+              {% csrf_token %}
+              <td>{{ form.language }}</td>
+              <td>{{ form.title }}</td>
+              <td><input type="submit" value="Add"></td>
+              </form>
+            </tr>
+          </tfoot>
+          <tbody>
+            {% for t in item.translation_set.all %}
+            <tr>
+              <td>
+                <img src="{{ t.language.flag.url }}" alt="{{ t.language.code }}" class="flag-round-sm">
+                <a href="#" id="{{ t.language.code }}" class="language-link">{{ t.language }}</a>
+              </td>
+              <td>{{ t }}</td>
+              <td>
+                <div class="progress-bar">
+                  <div style="width: {{ t.percentage_complete }}%"></div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div id="translated-captions">
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script id="show-translation">
+var translations = {{ trans_dict|safe }};
+
+function translateCaptions(lang){
+  var lines = translations[lang];
+  var trans = $('#translated-captions');
+  trans.empty();
+  trans.append("<a class='topright-pinned-button' href='{% url 'edit-captions' media=item.media_type i_id=item.id %}'>" +
+  " <i class='fa fa-pencil'></i>Edit</a>");
+  for(var i = 0; i < lines.length; i++){
+    trans.append(lines[i]+'<br>');
+  }
+  $('#original-content').hide();
+  trans.show();
+}
+
+$('.language-link').click(function(){
+    translateCaptions(this.id);
+    return false;
+});
+</script>
+
 
 {% endblock %}
